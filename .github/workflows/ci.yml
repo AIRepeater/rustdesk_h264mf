@@ -182,6 +182,14 @@ jobs:
         command: build
         args: --locked --target=${{ matrix.job.target }}
 
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: rustdesk-${{ matrix.job.target }}
+        path: |
+          target/${{ matrix.job.target }}/release/rustdesk
+          target/${{ matrix.job.target }}/release/rustdesk.exe
+
     - name: clean
       shell: bash
       run: |
