@@ -1962,9 +1962,7 @@ pub fn client_get_hwcodec_config_thread(wait_sec: u64) {
 #[cfg(feature = "hwcodec")]
 #[tokio::main(flavor = "current_thread")]
 pub async fn hwcodec_process() {
-    hbb_common::init_log(false, "check-hwcodec-config");
     let s = scrap::hwcodec::check_available_hwcodec();
-    log::info!("hwcodec_process result: {}", &s[..s.len().min(500)]);
     for _ in 0..5 {
         match crate::ipc::connect(1000, "").await {
             Ok(mut conn) => {
