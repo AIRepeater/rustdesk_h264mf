@@ -129,6 +129,9 @@ elseif(VCPKG_TARGET_IS_WINDOWS)
 --toolchain=msvc \
 --cc=cl \
 --enable-gpl \
+--enable-mediafoundation \
+--enable-encoder=h264_mf \
+--enable-encoder=hevc_mf \
 --enable-d3d11va \
 --enable-hwaccel=h264_d3d11va \
 --enable-hwaccel=hevc_d3d11va \
