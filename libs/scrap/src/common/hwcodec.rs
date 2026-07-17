@@ -205,7 +205,8 @@ impl EncoderApi for HwRamEncoder {
     }
 
     fn disable(&self) {
-        HwCodecConfig::clear(false, true);
+        let name = self.config.name.clone();
+        HwCodecConfig::remove_encoder(name);
     }
 }
 
@@ -675,6 +676,15 @@ impl HwCodecConfig {
         }
         crate::codec::Encoder::update(crate::codec::EncodingUpdate::Check);
     }
+
+    pub fn remove_encoder(name: String) {
+        log::info!("remove encoder: {name}");
+        let mut c = CONFIG.lock().unwrap();
+        if let Some(c) = c.as_mut() {
+            c.ram_encode.retain(|e| e.name != name);
+        }
+        crate::codec::Encoder::update(crate::codec::EncodingUpdate::Check);
+    }
 }
 
 pub fn check_available_hwcodec() -> String {
@@ -702,10 +712,10 @@ pub fn check_available_hwcodec() -> String {
     #[cfg(not(feature = "vram"))]
     let vram_string = "".to_owned();
     let mut ram_encode = Encoder::available_encoders(ctx, Some(vram_string));
-    // The external crate's probe loop may not detect h264_mf on all
-    // GPUs (e.g. Moore Threads MTT S70) due to codec-context setup
-    // differences that only manifest through the C API. The encoder
-    // itself is confirmed functional via standalone FFmpeg CLI tests.
+    // h264_mf: the upstream probe test may fail on some GPU / FFmpeg
+    // combinations (e.g. Moore Threads MTT S70) even though the encoder
+    // works correctly at runtime. Inject it directly so that it is
+    // available regardless of the probe result.
     #[cfg(windows)]
     if !ram_encode.iter().any(|c| c.format == DataFormat::H264) {
         ram_encode.push(CodecInfo {
