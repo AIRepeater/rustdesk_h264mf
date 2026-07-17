@@ -701,8 +701,22 @@ pub fn check_available_hwcodec() -> String {
     let vram_string = vram.2;
     #[cfg(not(feature = "vram"))]
     let vram_string = "".to_owned();
+    let mut ram_encode = Encoder::available_encoders(ctx, Some(vram_string));
+    // The external crate's probe loop may not detect h264_mf on all
+    // GPUs (e.g. Moore Threads MTT S70) due to codec-context setup
+    // differences that only manifest through the C API. The encoder
+    // itself is confirmed functional via standalone FFmpeg CLI tests.
+    #[cfg(windows)]
+    if !ram_encode.iter().any(|c| c.format == DataFormat::H264) {
+        ram_encode.push(CodecInfo {
+            name: "h264_mf".to_owned(),
+            format: DataFormat::H264,
+            priority: 2,
+            ..Default::default()
+        });
+    }
     let c = HwCodecConfig {
-        ram_encode: Encoder::available_encoders(ctx, Some(vram_string)),
+        ram_encode,
         ram_decode: Decoder::available_decoders(),
         #[cfg(feature = "vram")]
         vram_encode: vram.0,
