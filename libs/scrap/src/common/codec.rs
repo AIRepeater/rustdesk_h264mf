@@ -142,17 +142,20 @@ impl Encoder {
             }),
 
             #[cfg(feature = "hwcodec")]
-            EncoderCfg::HWRAM(_) => match HwRamEncoder::new(config, i444) {
-                Ok(hw) => Ok(Encoder {
-                    codec: Box::new(hw),
-                }),
-                Err(e) => {
-                    log::error!("new hw encoder failed: {e:?}, clear config");
-                    HwCodecConfig::clear(false, true);
-                    *ENCODE_CODEC_FORMAT.lock().unwrap() = CodecFormat::VP9;
-                    Err(e)
+            EncoderCfg::HWRAM(hw_config) => {
+                let enc_name = hw_config.name.clone();
+                match HwRamEncoder::new(EncoderCfg::HWRAM(hw_config), i444) {
+                    Ok(hw) => Ok(Encoder {
+                        codec: Box::new(hw),
+                    }),
+                    Err(e) => {
+                        log::error!("new hw encoder ({enc_name}) failed: {e:?}, removing from config");
+                        HwCodecConfig::remove_encoder(enc_name);
+                        *ENCODE_CODEC_FORMAT.lock().unwrap() = CodecFormat::VP9;
+                        Err(e)
+                    }
                 }
-            },
+            }
             #[cfg(feature = "vram")]
             EncoderCfg::VRAM(_) => match VRamEncoder::new(config, i444) {
                 Ok(tex) => Ok(Encoder {
