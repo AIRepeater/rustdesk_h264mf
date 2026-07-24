@@ -675,6 +675,17 @@ impl HwCodecConfig {
         }
         crate::codec::Encoder::update(crate::codec::EncodingUpdate::Check);
     }
+
+    #[cfg(feature = "vram")]
+    pub fn remove_vram_encoder(feature: &hwcodec::vram::FeatureContext) {
+        log::info!("remove failed vram encoder: {feature:?}");
+        let mut config = CONFIG.lock().unwrap();
+        if let Some(config) = config.as_mut() {
+            config.vram_encode.retain(|candidate| candidate != feature);
+        }
+        drop(config);
+        crate::codec::Encoder::update(crate::codec::EncodingUpdate::Check);
+    }
 }
 
 pub fn check_available_hwcodec() -> String {

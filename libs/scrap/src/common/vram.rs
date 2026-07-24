@@ -87,7 +87,12 @@ impl EncoderApi for VRamEncoder {
                         last_frame_len: 0,
                         same_bad_len_counter: 0,
                     }),
-                    Err(_) => Err(anyhow!(format!("Failed to create encoder"))),
+                    Err(_) => {
+                        if ctx.f.driver == Driver::MT {
+                            HwCodecConfig::remove_vram_encoder(&ctx.f);
+                        }
+                        Err(anyhow!(format!("Failed to create encoder")))
+                    }
                 }
             }
             _ => Err(anyhow!("encoder type mismatch")),
@@ -202,7 +207,11 @@ impl EncoderApi for VRamEncoder {
     }
 
     fn disable(&self) {
-        HwCodecConfig::clear(true, true);
+        if self.ctx.f.driver == Driver::MT {
+            HwCodecConfig::remove_vram_encoder(&self.ctx.f);
+        } else {
+            HwCodecConfig::clear(true, true);
+        }
     }
 }
 
