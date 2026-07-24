@@ -3972,7 +3972,7 @@ checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
 [[package]]
 name = "hwcodec"
 version = "0.7.1"
-source = "git+https://github.com/AIRepeater/hwcodec_h264mf?branch=feat/add-media-foundation-encoders#961b83c0b94418a1d503d5ad58898edc38379fd8"
+source = "git+https://github.com/AIRepeater/hwcodec_h264mf?branch=feat/add-media-foundation-encoders#8b1575caa84affa7814fa771e6a718416fda3254"
 dependencies = [
  "bindgen 0.59.2",
  "cc",
