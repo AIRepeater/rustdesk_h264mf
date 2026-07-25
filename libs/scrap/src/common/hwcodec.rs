@@ -231,13 +231,33 @@ impl HwRamEncoder {
     }
 
     pub fn encode(&mut self, yuv: &[u8], ms: i64) -> ResultType<Vec<EncodeFrame>> {
-        match self.encoder.encode(yuv, ms) {
-            Ok(v) => {
-                let mut data = Vec::<EncodeFrame>::new();
-                data.append(v);
-                Ok(data)
+        if self.config.name.contains("_mf") {
+            // Media Foundation encoders (e.g. h264_mf on Moore Threads MTT S70)
+            // buffer multiple frames internally before producing output.
+            // Use send_frame + non-blocking try_receive_packet pattern instead
+            // of the single-frame encode() which would always time out.
+            match self.encoder.encode_send_recv(yuv, ms) {
+                Ok(v) => {
+                    let mut data = Vec::<EncodeFrame>::new();
+                    data.append(v);
+                    Ok(data)
+                }
+                Err(_) => {
+                    // EAGAIN: encoder is still buffering input frames.
+                    // This is expected for the first ~17 frames after init.
+                    // Return empty vec; encode_to_message will skip this frame.
+                    Ok(Vec::<EncodeFrame>::new())
+                }
             }
-            Err(_) => Ok(Vec::<EncodeFrame>::new()),
+        } else {
+            match self.encoder.encode(yuv, ms) {
+                Ok(v) => {
+                    let mut data = Vec::<EncodeFrame>::new();
+                    data.append(v);
+                    Ok(data)
+                }
+                Err(_) => Ok(Vec::<EncodeFrame>::new()),
+            }
         }
     }
 
