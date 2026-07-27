@@ -1198,6 +1198,10 @@ fn handle_one_frame(
             if (first && !repeat) || *encode_fail_counter >= max_fail_times {
                 *encode_fail_counter = 0;
                 if encoder.is_hardware() {
+                    if encoder.reinit() {
+                        log::info!("encoder reinit success after {} fails", max_fail_times);
+                        return Ok(send_conn_ids);
+                    }
                     encoder.disable();
                     log::error!("switch due to encoding fails, first frame: {first}, error: {e:?}");
                     bail!("SWITCH");

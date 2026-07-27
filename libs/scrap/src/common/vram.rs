@@ -220,6 +220,10 @@ impl EncoderApi for VRamEncoder {
             HwCodecConfig::clear(true, true);
         }
     }
+
+    fn reinit(&mut self) -> bool {
+        self.encoder.reinit()
+    }
 }
 
 impl VRamEncoder {
@@ -289,7 +293,10 @@ impl VRamEncoder {
     }
 
     pub fn encode(&mut self, texture: *mut c_void, ms: i64) -> Result<Vec<EncodeFrame>, i32> {
-        self.encoder.encode(texture, ms).map(|v| v.clone())
+        match self.encoder.encode(texture, ms) {
+            Ok(frames) => Ok(std::mem::take(frames)),
+            Err(e) => Err(e),
+        }
     }
 
     pub fn bitrate(fmt: DataFormat, width: usize, height: usize, ratio: f32) -> u32 {

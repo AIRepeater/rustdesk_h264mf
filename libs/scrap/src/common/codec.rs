@@ -81,6 +81,8 @@ pub trait EncoderApi {
     fn is_hardware(&self) -> bool;
 
     fn disable(&self);
+
+    fn reinit(&mut self) -> bool { false }
 }
 
 pub struct Encoder {
