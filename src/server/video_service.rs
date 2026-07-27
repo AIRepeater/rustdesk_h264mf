@@ -1198,8 +1198,17 @@ fn handle_one_frame(
             if (first && !repeat) || *encode_fail_counter >= max_fail_times {
                 *encode_fail_counter = 0;
                 if encoder.is_hardware() {
-                    if encoder.reinit() {
-                        log::info!("encoder reinit success after {} fails", max_fail_times);
+                    let mut reinit_ok = false;
+                    for attempt in 0..3 {
+                        if encoder.reinit() {
+                            reinit_ok = true;
+                            break;
+                        }
+                        log::warn!("encoder reinit attempt {} failed", attempt + 1);
+                        std::thread::sleep(std::time::Duration::from_millis(500));
+                    }
+                    if reinit_ok {
+                        log::info!("encoder reinit success after retries");
                         return Ok(send_conn_ids);
                     }
                     encoder.disable();

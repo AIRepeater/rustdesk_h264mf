@@ -88,9 +88,6 @@ impl EncoderApi for VRamEncoder {
                         same_bad_len_counter: 0,
                     }),
                     Err(_) => {
-                        if ctx.f.driver == Driver::MT {
-                            HwCodecConfig::remove_vram_encoder(&ctx.f);
-                        }
                         Err(anyhow!(format!("Failed to create encoder")))
                     }
                 }
@@ -214,11 +211,7 @@ impl EncoderApi for VRamEncoder {
     }
 
     fn disable(&self) {
-        if self.ctx.f.driver == Driver::MT {
-            HwCodecConfig::remove_vram_encoder(&self.ctx.f);
-        } else {
-            HwCodecConfig::clear(true, true);
-        }
+        log::info!("vram encoder disabled (temporary), driver: {:?}", self.ctx.f.driver);
     }
 
     fn reinit(&mut self) -> bool {

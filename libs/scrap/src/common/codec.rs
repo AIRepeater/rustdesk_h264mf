@@ -162,8 +162,7 @@ impl Encoder {
                     codec: Box::new(tex),
                 }),
                 Err(e) => {
-                    log::error!("new vram encoder failed: {e:?}, clear config");
-                    HwCodecConfig::clear(true, true);
+                    log::error!("new vram encoder failed: {e:?}");
                     *ENCODE_CODEC_FORMAT.lock().unwrap() = CodecFormat::VP9;
                     Err(e)
                 }
