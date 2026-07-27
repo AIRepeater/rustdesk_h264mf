@@ -10,7 +10,7 @@ use crate::{
     AdapterDevice, CodecFormat, EncodeInput, EncodeYuvFormat, Pixfmt,
 };
 use hbb_common::{
-    anyhow::{anyhow, bail, Context},
+    anyhow::{anyhow, bail},
     bytes::Bytes,
     log,
     message_proto::{EncodedVideoFrame, EncodedVideoFrames, VideoFrame},
@@ -112,16 +112,23 @@ impl EncoderApi for VRamEncoder {
         }
         let mut vf = VideoFrame::new();
         let mut frames = Vec::new();
-        for frame in self
-            .encode(texture, ms)
-            .with_context(|| "Failed to encode")?
-        {
-            frames.push(EncodedVideoFrame {
-                data: Bytes::from(frame.data),
-                pts: frame.pts,
-                key: frame.key == 1,
-                ..Default::default()
-            });
+        match self.encode(texture, ms) {
+            Ok(v) => {
+                for frame in v {
+                    frames.push(EncodedVideoFrame {
+                        data: Bytes::from(frame.data),
+                        pts: frame.pts,
+                        key: frame.key == 1,
+                        ..Default::default()
+                    });
+                }
+            }
+            Err(-2) => {
+                return Err(anyhow!(crate::codec::ENCODE_NO_FRAME));
+            }
+            Err(e) => {
+                return Err(anyhow!("encode error: {}", e));
+            }
         }
         if frames.len() > 0 {
             // This kind of problem is occurred after a period of time when using AMD encoding,
@@ -281,15 +288,8 @@ impl VRamEncoder {
         }
     }
 
-    pub fn encode(&mut self, texture: *mut c_void, ms: i64) -> ResultType<Vec<EncodeFrame>> {
-        match self.encoder.encode(texture, ms) {
-            Ok(v) => {
-                let mut data = Vec::<EncodeFrame>::new();
-                data.append(v);
-                Ok(data)
-            }
-            Err(_) => Ok(Vec::<EncodeFrame>::new()),
-        }
+    pub fn encode(&mut self, texture: *mut c_void, ms: i64) -> Result<Vec<EncodeFrame>, i32> {
+        self.encoder.encode(texture, ms).map(|v| v.clone())
     }
 
     pub fn bitrate(fmt: DataFormat, width: usize, height: usize, ratio: f32) -> u32 {

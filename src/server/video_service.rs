@@ -1172,6 +1172,17 @@ fn handle_one_frame(
             send_conn_ids = sp.send_video_frame(msg);
         }
         Err(e) => {
+            match e.to_string().as_str() {
+                scrap::codec::ENCODE_NO_FRAME => {
+                    return Ok(send_conn_ids);
+                }
+                scrap::codec::ENCODE_NEED_SWITCH => {
+                    encoder.disable();
+                    log::error!("switch due to encoder need switch");
+                    bail!("SWITCH");
+                }
+                _ => {}
+            }
             *encode_fail_counter += 1;
             // Encoding errors are not frequent except on Android
             if !cfg!(target_os = "android") {
@@ -1191,14 +1202,6 @@ fn handle_one_frame(
                     log::error!("switch due to encoding fails, first frame: {first}, error: {e:?}");
                     bail!("SWITCH");
                 }
-            }
-            match e.to_string().as_str() {
-                scrap::codec::ENCODE_NEED_SWITCH => {
-                    encoder.disable();
-                    log::error!("switch due to encoder need switch");
-                    bail!("SWITCH");
-                }
-                _ => {}
             }
         }
     }

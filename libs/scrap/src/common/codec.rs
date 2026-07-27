@@ -46,6 +46,7 @@ lazy_static::lazy_static! {
 }
 
 pub const ENCODE_NEED_SWITCH: &'static str = "ENCODE_NEED_SWITCH";
+pub const ENCODE_NO_FRAME: &'static str = "ENCODE_NO_FRAME";
 
 #[derive(Debug, Clone)]
 pub enum EncoderCfg {
