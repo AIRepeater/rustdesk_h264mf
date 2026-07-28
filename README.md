@@ -1,3 +1,11 @@
+> [!NOTE]
+> **本分支（feat/mt-native-encoder）为摩尔线程显卡新增了原生 H.264/HEVC 硬件编码后端。**
+> - 通过运行时动态加载 `mtencodeapi64.dll`（MTEncode SDK v1.2.0），无需静态链接或打包 DLL
+> - 支持 D3D11 纹理零拷贝输入（BGRA→NV12），需开启 DirectX 捕捉
+> - 同时发布 H.264 和 H.265 两种 VRAM 编码能力，深度 probe 验证真实编码可用
+> - 分级错误恢复：瞬时故障静默跳帧 → reinit 重试 → 会话级回退软件编码
+> - 仅支持 Windows x86_64，CI 已收敛到该平台
+
 <p align="center">
   <img src="res/logo-header.svg" alt="RustDesk - Your remote desktop"><br>
   <a href="#raw-steps-to-build">Build</a> •

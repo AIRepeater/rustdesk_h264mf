@@ -211,7 +211,7 @@ impl EncoderApi for VRamEncoder {
     }
 
     fn disable(&self) {
-        log::info!("vram encoder disabled (temporary), driver: {:?}", self.ctx.f.driver);
+        log::info!("vram encoder disabled (session-level fallback), driver: {:?}", self.ctx.f.driver);
     }
 
     fn reinit(&mut self) -> bool {
