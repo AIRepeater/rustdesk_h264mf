@@ -3972,7 +3972,7 @@ checksum = "9a3a5bfb195931eeb336b2a7b4d761daec841b97f947d34394601737a7bba5e4"
 [[package]]
 name = "hwcodec"
 version = "0.7.1"
-source = "git+https://github.com/AIRepeater/hwcodec_h264mf?branch=feat/mt-native-encoder#c2bf78dd8c3ab20f421c9cb5589f394ccdeb0557"
+source = "git+https://github.com/AIRepeater/hwcodec-MT?branch=feat/mt-native-encoder#6638d5e46c19117f2bac8ecc0acf1d17ef60195e"
 dependencies = [
  "bindgen 0.59.2",
  "cc",

@@ -60,7 +60,7 @@ gstreamer-video = { version = "0.16", optional = true }
 zbus = { version = "3.15", optional = true }
 
 [dependencies.hwcodec]
-git = "https://github.com/AIRepeater/hwcodec_h264mf"
+git = "https://github.com/AIRepeater/hwcodec-MT"
 branch = "feat/mt-native-encoder"
 optional = true
 
